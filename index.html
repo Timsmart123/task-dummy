@@ -1,22 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Dummy</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Manager</title>
 </head>
 <body>
-    <h1>Task Dummy</h1>
-    <p>hepls maintain and manage group tasks</p>
+  <header>
+    <h1>Task Manager</h1>
+    <p>Track tasks for the team</p>
+  </header>
 
-    <nav>user : <p id="logger"></p></nav>
-    <script>
-        let USER = 'samuel';
+  <main>
+    <section>
+      <h2>Add Task</h2>
+      <input type="text" id="taskInput" placeholder="Enter task name">
+      <input type="text" id="userInput" placeholder="Assigned to">
+      <button id="addTaskBtn" >Add Task</button>
+    </section>
 
+    <section>
+      <h2>Tasks</h2>
+      <p id="emptyState">No tasks yet.</p>
+      <ul id="taskList"></ul>
+    </section>
+  </main>
 
-        let logger = document.getElementById('logger');
-        
-        logger.innerText = `user: ${USER}`
-    </script>
+  <script src="script.js"></script>
 </body>
 </html>
