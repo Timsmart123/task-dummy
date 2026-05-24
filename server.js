@@ -31,4 +31,4 @@ app.delete('/api/delete/:id', (req,res)=>{
     }
 })
 
-app.listen(4000, () => console.log('Running on 4000!!'));
+app.listen(4000, () => console.log('Running on http://localhost:4000/  !!'));
