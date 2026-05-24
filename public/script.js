@@ -1,3 +1,9 @@
+// const { get } = require("node:https");
+
+// const { type } = require("node:os");
+
+// const { json } = require("body-parser");
+
 let taskInput = document.getElementById('taskInput');
 let userInput = document.getElementById('userInput');
 
@@ -7,12 +13,17 @@ let emptyState = document.getElementById('emptyState');
 let taskList = document.getElementById('taskList');
 
 // Default List
-let copyTask = [
-    {id:1, task:'Put the add button', to:'Tim'},
-    {id:2, task:'Style the list', to:'Sam'},
-    {id:3, task:'return', to:'Tee'},
-]
+// let copyTask = [
+//     {id:1, task:'Put the add button', to:'Tim'},
+//     {id:2, task:'Style the list', to:'Sam'},
+//     {id:3, task:'return', to:'Tee'},
+// ]
+// 
 
+let copyTask = [];
+
+fetch('/api/tasks').then(res =>  res.json()).then(data => {copyTask = data;updateList();itemCheck();}).catch(err => console.log(err))
+// fetch('/api/tasks').then(res => {let copyTask = res.json()}).catch(err => console.log(err))
 
 
 function addTask() {
@@ -21,7 +32,16 @@ function addTask() {
     var userVal = userInput.value.trim();
 
     if (taskVal && userVal){
-        copyTask = [...copyTask,{id:Date.now(),task:taskVal,to:userVal}]
+        let newTask = {id:Date.now(),task:taskVal,to:userVal};
+
+        fetch('/api/update', {
+            method: 'POST',
+            headers: {
+                'content-type':'application/json',
+            },
+            body : JSON.stringify(newTask)
+        })
+        copyTask.push(newTask);
 
         updateList();
 
@@ -30,9 +50,11 @@ function addTask() {
 
     taskInput.value = '';
     userInput.value = '';
-    itemCheck()
+    itemCheck();
 
-     console.log(taskList)
+
+
+    console.log(taskList)
 }
 
 addTaskBtn.addEventListener('click', function () { addTask();});
@@ -67,21 +89,26 @@ updateList()
 
 function del(taskItem,element){
     
-    let ind = copyTask.findIndex(p => p.id == element.id);
+    fetch(`/api/delete/${element.id}`, {
+        method:'DELETE',
+    }).then(res => res.json()).then(data => {
+        let ind = copyTask.findIndex(p => p.id == element.id);
 
-    copyTask.splice(ind,1);
+        copyTask.splice(ind,1);
+        
+        updateList();
+        itemCheck();
+        alert(data.message)
+    }).catch(err => console.log(err))
     
-    itemCheck();
-
-    updateList();
 }
 
 function itemCheck(){
     if (taskList.children.length == 0) {
-    emptyState.style.display = 'block';
+        emptyState.style.display = 'block';
     } else {
         emptyState.style.display = 'none';
     }
 }
 
-console.log(taskList.children.length)
+
