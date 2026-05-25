@@ -1,13 +1,33 @@
+const fs = require('fs')
 const express = require('express');
 const app = express();
 
 app.use(express.json());
 app.use(express.static('public'));
-let tasks = [
-        {id:1, task:'Put the add button', to:'Tim'},
-        {id:2, task:'Style the list', to:'Sam'},
-    ]
+// let tasks = [
+//         {id:1, task:'Put the add button', to:'Tim'},
+//         {id:2, task:'Style the list', to:'Sam'},
+//     ]
+let tasks = [];
+fs.readFile('tasks.json', (err,data)=> {
+    if (err) {
+        console.log(err);
+    } else {
+        tasks = JSON.parse(data || '[]')
+    }
+} )
 
+function saveTasks() {
+    fs.writeFile(
+        'tasks.json', 
+        JSON.stringify(tasks,null,2), 
+        (err) => {
+            if (err) {
+                console.log(err)
+            }
+        }
+    )
+}
     
 app.get('/api/tasks',(req,res)=>{
     res.json(tasks)
@@ -15,7 +35,8 @@ app.get('/api/tasks',(req,res)=>{
 
 app.post('/api/update', (req,res)=>{
     tasks.push(req.body);
-    res.json({message:'Task Added'})
+    res.json({message:'Task Added'});
+    saveTasks()
 })
 app.delete('/api/delete/:id', (req,res)=>{
 
@@ -25,7 +46,8 @@ app.delete('/api/delete/:id', (req,res)=>{
 
     if (idx !== -1){
         tasks.splice(idx,1);
-        res.json({message:'Task Deleted'})
+        res.json({message:'Task Deleted'});
+        saveTasks()
     } else {
         res.status(404).json({message:'Task not found'})
     }
