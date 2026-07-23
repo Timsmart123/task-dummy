@@ -1,5 +1,7 @@
 // const { get } = require("node:https");
 
+// const { text } = require("express");
+
 // const { type } = require("node:os");
 
 // const { json } = require("body-parser");
@@ -70,16 +72,26 @@ function updateList() {
         const element = copyTask[i];
         
         let taskItem = document.createElement('li');
-        taskItem.textContent = `${element.task} --> ${element.to}` ;
+        taskItem.className = 'taskItem';
+
+        let taskDetails = document.createElement('div');
+        taskDetails.className = 'task-details';
+
+        let taskTitle = document.createElement('span');
+        taskTitle.className = 'task-title';
+        taskTitle.textContent = element.task;
+
+        let taskAssignee = document.createElement('span');
+        taskAssignee.className = 'task-assignee';
+        taskAssignee.textContent = `Assigned to ${element.to}`;
 
         let deltask = document.createElement('button');
-        deltask.textContent = 'x'
+        deltask.textContent = 'Remove';
+        deltask.setAttribute('aria-label', `Remove ${element.task}`);
 
+        taskDetails.append(taskTitle, taskAssignee);
+        taskItem.append(taskDetails, deltask);
         taskList.appendChild(taskItem);
-        
-        taskItem.setAttribute('class','taskItem');
-        
-        taskItem.appendChild(deltask);
 
        
         deltask.addEventListener('click', function (){ del(taskItem,element); })
@@ -119,7 +131,7 @@ function itemCheck(){
 // Push Notif ✅
 let notif = document.getElementById('notif');
 
-notif.addEventListener('click', ()=>{ pushNotif('Hey Son wys, Good Luck', 'https://google.com')});
+notif.addEventListener('click', ()=>{ pushNotif('Taskflow is ready', window.location.href)});
 
 function pushNotif(msg,link) {
     Notification.requestPermission().then(res => {
@@ -151,13 +163,15 @@ function pushNotif(msg,link) {
 // Bugging method ✅ works immediately online or offline (doesn't need rerender), bit buggy but kinda works
 
 
-window.addEventListener('online', ()=>{pushNotif('Welcome')});
+let presence = document.getElementById('presence');
 
-window.addEventListener('offline', ()=>{pushNotif('Byeee')});
+function updatePresence() {
+    presence.textContent = navigator.onLine ? 'You are online' : 'You are offline';
+}
 
-// let presence = document.getElementById('presence');
-
-// window.addEventListener('online', ()=>{presence.textContent = 'Online'}); // NOT REALLY CONSOLING
+updatePresence();
+window.addEventListener('online', ()=>{ updatePresence(); pushNotif('You are back online'); });
+window.addEventListener('offline', ()=>{ updatePresence(); pushNotif('You are offline'); });
 
 
 
@@ -166,7 +180,14 @@ window.addEventListener('offline', ()=>{pushNotif('Byeee')});
 
 let vib = document.getElementById('vib')
 
-vib.addEventListener('click', ()=>{navigator.vibrate(1000);pushNotif('works')});
+vib.addEventListener('click', ()=>{
+    if ('vibrate' in navigator) {
+        navigator.vibrate(200);
+        pushNotif('Vibration sent');
+    } else {
+        alert('Vibration is not supported by this device.');
+    }
+});
 
 
 
@@ -174,9 +195,13 @@ vib.addEventListener('click', ()=>{navigator.vibrate(1000);pushNotif('works')});
 
 let battery = document.getElementById('battery')
 
-navigator.getBattery().then(bat => {
-    battery.textContent = `Battery Level :${bat.level * 100} - ${bat.charging ? 'charging' : 'Not charging'}`
-})
+if ('getBattery' in navigator) {
+    navigator.getBattery().then(bat => {
+        battery.textContent = `${Math.round(bat.level * 100)}% · ${bat.charging ? 'Charging' : 'Not charging'}`;
+    });
+} else {
+    battery.textContent = 'Battery details unavailable';
+}
 
 
 
@@ -189,13 +214,12 @@ camBtn.addEventListener('click', ()=> {useCam()});
 function useCam() {
     navigator.mediaDevices.getUserMedia({
         video:true,
-        audio:true
+        audio:false
     }).then(res => {
         let video = document.getElementById('cam');
 
-        video.srcObject = res
-
-    })
+        video.srcObject = res;
+    }).catch(() => alert('Camera access was not granted.'));
 }
 
 
@@ -213,10 +237,7 @@ window.addEventListener('deviceorientation', (e)=> {
 window.addEventListener('deviceorientation', (e)=> {
     
     let tilt = document.getElementById('tilt')
-    tilt.textContent = 
-    `Front/Back - ${e.beta} <br /> 
-    Left/Right - ${e.alpha} <br /> 
-    Side - ${e.gamma}`
+    tilt.textContent = `Front/back: ${e.beta ?? '—'}\nLeft/right: ${e.alpha ?? '—'}\nSide tilt: ${e.gamma ?? '—'}`;
 })
 
 window.addEventListener('devicemotion', (e)=> {console.log(e)})
@@ -239,11 +260,13 @@ function screenShare() {
         let screen = document.getElementById('screen');
 
         screen.srcObject = res;
-
-        
-
-    })
+    }).catch(() => alert('Screen sharing was cancelled or is unavailable.'));
 }
+
+document.getElementById('screenExpandBtn').addEventListener('click', () => {
+    const preview = document.getElementById('screenPreview');
+    if (preview.requestFullscreen) preview.requestFullscreen();
+});
 
 // Location ✅
 
@@ -253,8 +276,45 @@ locateBtn.addEventListener('click', ()=> {locate()});
 
 function locate(){
     navigator.geolocation.getCurrentPosition(res => {
-        pushNotif(`Long - ${res.coords.latitude}, Lat - ${res.coords.latitude}, Speed - ${res.coords.speed ? res.coords.speed:'Not moving' }`);
-        console.log(res)
-    })
+        const { latitude, longitude, speed } = res.coords;
+        document.getElementById('displayPos').textContent = `${latitude.toFixed(4)}, ${longitude.toFixed(4)} · ${speed ?? 0} m/s`;
+    }, () => {
+        document.getElementById('displayPos').textContent = 'Location permission was not granted';
+    });
 }
 
+
+// Share 
+
+let shareBtn = document.getElementById('shareBtn');
+
+shareBtn.addEventListener('click', ()=>{shareLink()} );
+
+let shareData = {
+    title:'Taskflow',
+    url:window.location.href,
+    text:'Check out this Taskflow page.',
+    // files:'/public/index.html'
+}
+
+function shareLink() {
+    if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))){
+        navigator.share(shareData).catch(() => {});
+    }else if (navigator.clipboard) {
+        navigator.clipboard.writeText(window.location.href)
+            .then(() => alert('Sharing is unavailable here, so the page link was copied instead.'))
+            .catch(() => alert('Sharing is not supported by this browser.'));
+    } else {
+        alert('Sharing is not supported by this browser.');
+    }
+
+    // pushNotif('lol','https://excelhr.vercel.app');
+}
+
+// Bcrypt
+
+// let pass = 'wagg123'
+
+// let code = bcrypt.hash(pass,10)
+// console.log(pass)
+console.log(window.navigator.appVersion)
