@@ -1,37 +1,124 @@
-# task-dummy
+# Task Dummy
 
-A project built with JavaScript and HTML.
+A simple task management application built with Node.js/Express backend and a frontend interface for managing tasks.
 
-## Overview
+## 📝 About
 
-This repository contains a web application developed primarily using JavaScript (55.1%) and HTML (44.9%).
+Task Dummy is a lightweight task manager that allows users to create, view, and delete tasks. Each task can be assigned to a person and is persisted to a JSON file. The application provides a clean interface for managing your to-do list with real-time updates.
 
-## Technologies Used
+## 🛠️ Technologies Used
 
-- **JavaScript** (55.1%) - Core application logic and interactivity
-- **HTML** (44.9%) - Structure and markup
+- **Backend**: Node.js with Express.js (JavaScript)
+- **Frontend**: HTML & JavaScript
+- **Data Storage**: JSON file-based persistence
+- **HTTP Methods**: REST API with GET, POST, and DELETE operations
 
-## Getting Started
+## 📁 Project Structure
 
-To get started with this project, clone the repository and open the HTML files in your browser or set up a local development server.
+```
+task-dummy/
+├── server.js          # Express server with API endpoints
+├── package.json       # Project dependencies and metadata
+├── tasks.json         # JSON file storing task data
+├── public/            # Static files and frontend assets
+└── .gitignore         # Git ignore rules
+```
 
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (v14 or higher)
+- npm
+
+### Installation
+
+1. Clone the repository:
 ```bash
 git clone https://github.com/Timsmart123/task-dummy.git
 cd task-dummy
 ```
 
-## Usage
+2. Install dependencies:
+```bash
+npm install
+```
 
-Follow the instructions in the project files to use and interact with the application.
+3. Start the server:
+```bash
+node server.js
+```
 
-## Contributing
+4. Open your browser and navigate to:
+```
+http://localhost:4000
+```
 
-Contributions are welcome! Feel free to fork this repository and submit pull requests with improvements.
+## 📚 API Endpoints
 
-## License
+### Get All Tasks
+```
+GET /api/tasks
+```
+Returns an array of all tasks.
 
-This project is open source and available under the MIT License.
+### Add a New Task
+```
+POST /api/update
+Content-Type: application/json
 
-## Contact
+{
+  "task": "Task description",
+  "to": "Assigned person"
+}
+```
+Adds a new task to the list and persists it to `tasks.json`.
 
-For questions or feedback, please open an issue in the repository.
+### Delete a Task
+```
+DELETE /api/delete/:id
+```
+Deletes a task by its ID.
+
+## 💾 Data Format
+
+Tasks are stored in `tasks.json` with the following structure:
+```json
+{
+  "id": 1779754350121,
+  "task": "Task description",
+  "to": "Assigned person"
+}
+```
+
+## 🎯 Usage
+
+1. Start the server using the commands above
+2. Access the application at `http://localhost:4000`
+3. Add new tasks using the frontend form
+4. Assign tasks to team members
+5. Delete completed or unnecessary tasks
+6. Tasks are automatically saved to `tasks.json`
+
+## 🔄 How It Works
+
+- The server reads tasks from `tasks.json` on startup
+- New tasks are sent via POST request to `/api/update`
+- Tasks are automatically saved to the JSON file after each modification
+- The frontend fetches tasks via GET `/api/tasks` and displays them
+- Deleting tasks removes them from the list and updates the JSON file
+
+## 📦 Dependencies
+
+- **express** (^5.2.1) - Web framework for handling HTTP requests
+
+## 📝 License
+
+ISC
+
+## 👤 Author
+
+Timsmart123
+
+## 🐛 Issues & Contributions
+
+Found a bug or have a feature request? Feel free to open an issue or submit a pull request on the [GitHub repository](https://github.com/Timsmart123/task-dummy).
